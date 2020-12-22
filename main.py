@@ -7,9 +7,9 @@ import thread
 
 bellButton_input = 16 #Outside bell button sense
 unlockButton_input = 22 #door_unlock button sense
-audio_output = 12 #pwm Output for doorbell sound play
+#audio_output = 12 #pwm Output for doorbell sound play
 #14 & 16 GND
-is_live = False
+
 
 def signal_handler(sig, frame):
     GPIO.cleanup()
@@ -17,9 +17,8 @@ def signal_handler(sig, frame):
 
 def unlock_callback(channel):
     print("Door Unlocked!")
-    deactivateISR(channel)
-    #startVideoStream()
-    activateISR(channel)
+    thread.start_new_thread(stopVideoStream,(channel,))
+    print("Video Stopped")
 
 def bellButton_callback(channel):
     print("DoorBell Ringing!")
@@ -29,17 +28,24 @@ def bellButton_callback(channel):
 def startVideoStream(channel):
     deactivateISR(channel)
     print("DEBUG 1!")
-    #os.system('tvservice -p')
+    os.system('tvservice -p')
     #os.system('omxplayer --no-keys --avdict rtsp_transport:tcp "rtsp://admin:admin123@192.168.1.108:554/cam/realmonitor?channel=1&subtype=0" &')
     print("DEBUG 2!")
-    #os.system('omxplayer /opt/vc/src/hello_pi/hello_video/test.h264 &')
+    os.system('omxplayer /home/pi/testvideo.mp4 &')
     print("DEBUG 3!")    
-    time.sleep(10)
+    time.sleep(60)
     print("DEBUG 4!")
-    #os.system('killall omxplayer.bin')
+    os.system('killall omxplayer.bin')
     print("DEBUG 5!")    
-    #os.system('tvservice -o')
+    os.system('tvservice -o')
     print("DEBUG 6!")
+    activateISR(channel)
+
+def stopVideoStream(channel):
+    deactivateISR(channel)
+    time.sleep(10)
+    os.system('killall omxplayer.bin')
+    os.system('tvservice -o')
     activateISR(channel)
 
 def setup():
