@@ -49,6 +49,7 @@ def stopVideoStream(channel):
     activateISR(channel)
 
 def setup():
+    os.system('tvservice -o')
     time.sleep(0.1)
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(bellButton_input, GPIO.IN, pull_up_down=GPIO.PUD_UP)
