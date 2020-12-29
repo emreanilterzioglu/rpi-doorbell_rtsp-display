@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import os
 import time
 import thread
+import logging
 
 bellButton_input = 16 #Outside bell button sense
 unlockButton_input = 22 #door_unlock button sense
@@ -16,16 +17,17 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def unlock_callback(channel):
-    print("Door Unlocked!")
+    logging.info("Door Unlocked")
     thread.start_new_thread(stopVideoStream,(channel,))
-    print("Video Stopped")
+    logging.info("Video Stopped")
 
 def bellButton_callback(channel):
-    print("DoorBell Ringing!")
+    logging.info("DoorBell Ringing!")
     thread.start_new_thread(startVideoStream,(channel,))
-    print("Video Thread Started!")
+    logging.info("Video Thread Started!")
 
 def startVideoStream(channel):
+    logging.info("Video Started")
     deactivateISR(channel)
     print("DEBUG 1!")
     os.system('tvservice -p')
@@ -42,6 +44,7 @@ def startVideoStream(channel):
     activateISR(channel)
 
 def stopVideoStream(channel):
+    logging.info("Video Stopped")
     deactivateISR(channel)
     time.sleep(10)
     os.system('killall omxplayer.bin')
@@ -49,6 +52,7 @@ def stopVideoStream(channel):
     activateISR(channel)
 
 def setup():
+    logging.info("Setup Initialized")
     os.system('tvservice -o')
     time.sleep(0.1)
     GPIO.setmode(GPIO.BOARD)
@@ -69,17 +73,24 @@ def activateISR(channel):
 
    if channel == bellButton_input:
        GPIO.add_event_detect(bellButton_input, GPIO.FALLING,callback=bellButton_callback, bouncetime=1000)
-       print("BellButton ISR Activated!")
+       logging.info("BellButton ISR Activated!")
 
    if channel == unlockButton_input:
        GPIO.add_event_detect(unlockButton_input, GPIO.FALLING,callback=unlock_callback, bouncetime=1000)
-       print("UnlockButton ISR Activated!")
+       logging.info("UnlockButton ISR Activated!")
 
 def deactivateISR(channel):
     time.sleep(0.1)
     GPIO.remove_event_detect(channel)
 
 if __name__ == '__main__':
+
+    logging.basicConfig(filename="/home/pi/log.txt",
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.DEBUG)
+
 
     setup()
 
