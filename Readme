@@ -1,4 +1,6 @@
-Requirements==> omxplayer
+Requirements
+==> Rasbian Buster Lite
+==> omxplayer
 
 ####Service File####
 /etc/systemd/system/doorbell.service
